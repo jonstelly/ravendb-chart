@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "ravendb.fullname" . }}
+  labels:
+    helm.sh/chart: {{ include "ravendb.chart" . }}
+    app.kubernetes.io/name: {{ include "ravendb.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  serviceName: {{ include "ravendb.name" . }}
+  selector:
+    matchLabels:
+      app: {{ include "ravendb.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "ravendb.name" . }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: https
+              containerPort: 443
+              protocol: TCP
+            - name: tcp
+              containerPort: 38888
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: https
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: https
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: RAVEN_ARGS
+              value: '--log-to-console --Setup.Mode=None --ServerUrl=https://0.0.0.0/ --ServerUrl.Tcp=tcp://0.0.0.0:38888/ --PublicServerUrl=https://$POD_NAME/ --PublicServerUrl.Tcp=tcp://$POD_NAME:38888/'
+            - name: RAVEN_Setup_Mode
+              value: 'NONE'
+            - name: RAVEN_License_Eula_Accepted
+              value: 'true'
+            - name: RAVEN_Features_Availability
+              value: 'Experimental'
+            - name: RAVEN_Logs_Mode
+              value: 'Information'
+            - name: RAVEN_Security_WellKnownCertificates_Admin
+              value: {{ .Values.security.adminCertificate }}
+            - name: RAVEN_Security_Certificate_Path
+              value: '/config/certs/ravendb.pfx'
+            - name: RAVEN_Security_Certificate_Password
+              valueFrom:
+                secretKeyRef:
+                  name: ravendb
+                  key: password
+          volumeMounts:
+          - name: {{ include "ravendb.name" . }}
+            mountPath: /opt/RavenDB/Server/RavenData
+          - name: ravendb-certs
+            mountPath: /config/certs
+      volumes:
+        - name: ravendb-certs
+          secret:
+            secretName: ravendb
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ include "ravendb.name" . }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.persistence.storage }}
+
