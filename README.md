@@ -38,9 +38,9 @@ You'll also need a Kubernetes Cluster with Helm/Tiller (I'm using Kubernetes v1.
 
 If you run only a single instance of RavenDB then it's fairly easy to get access to your single instance from outside the Kubernetes cluster.
 
-But if you're running a cluster of 2+ instances, because of the way that RavenDB does clustering/name resolution and provides the cluster map to clients, accessing RavenDB from outside the cluster is slightly tricky.  The short version is that name resolution outside the cluster has to match the names and ports you use to access RavenDB instances from inside the cluster and that's not the easiest thing to set up when developing on Windows (experts please point me in a better direction than what I outline below if there is one).
+But if you're running a cluster of 2+ instances, because of the way that RavenDB does clustering/name resolution and provides the cluster map to clients, accessing RavenDB from outside the cluster is slightly tricky.  The short version is that name resolution outside the cluster has to match the names and ports you use to access RavenDB instances from inside the cluster and that's not the easiest thing to set up with Kubernetes (experts please point me in a better direction than what I outline below if there is one).
 
-I'm not a Kubernetes expert, so I'm not sure of all the options to get name resolution like I mention above, but for me I'm running a bastion/VPN pod using SoftEther and SSTP where I push route entries for the cluster ip subnet, and set the DNS suffix of the connection to the kubernetes namespace DNS domain.  A SoftEther server config using microk8s (whose default cluster ip subnet is 10.152.183.0/24) looks like this:
+I'm not a Kubernetes expert, so I'm not sure of all the options to get name resolution like I mention above, but for me I'm running a bastion/VPN pod using SoftEther and SSTP where I push route entries for the cluster ip subnet, and set the DNS suffix of the connection to the kubernetes namespace DNS domain.  A SoftEther server DHCP config using microk8s (whose default cluster ip subnet is 10.152.183.0/24) looks like this:
 
 ```
 declare VirtualDhcpServer
