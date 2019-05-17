@@ -12,6 +12,8 @@ I'm using microk8s for running Kubernetes and do my development on a Windows mac
 
 RavenDB nodes aren't automatically added to a cluster so you'll need to do that by hand.  If you're using Kubernetes Persistence each RavenDB node will have its own volume.  Assuming those volumes aren't reclaimed when a node shuts down, once you add a node to the RavenDB cluster, it'll remain in the cluster even if it's destroyed and recreated.   From the documentation [here](https://ravendb.net/docs/article-page/4.1/csharp/studio/server/cluster/add-node-to-cluster) and [here](https://ravendb.net/docs/article-page/4.1/csharp/server/configuration/cluster-configuration) I don't see any way of configuring the nodes to automatically join a cluster.
 
+There's no option in the chart for how you might run different nodes in your cluster with different CPU/memory sizes (like for a cluster watcher maybe?)  I *_THINK_* you could simply deploy this chart twice with two different configurations, with one helm deployment named `ravendb` and a second helm deployment named `ravendb-watchers`... But I haven't tested that out yet.
+
 ## Prerequisites
 
 You'll need to generate certificates for RavenDB as outlined [here](https://ravendb.net/docs/article-page/4.1/csharp/server/security/authentication/certificate-management).  *_NOTE: I have a slightly different certificate generation process, so there may be some gaps in this example chart but overall I think it's correct._*
