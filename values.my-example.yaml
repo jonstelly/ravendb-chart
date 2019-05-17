@@ -1,18 +1,9 @@
 persistence:
   storage: 20G
 
-#TODO - Parameterize this
+#TODO - Replace 123456 with the Thumbprint of your administrator certificate
 security:
   adminCertificate: 123456 
 
 ingress:
-  enabled: true
-  annotations:
-    #I've got multiple ingress controllers, ravendb is only exposed on private ingress
-    kubernetes.io/ingress.class: 'private'
-    nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
-  paths:
-    - "/"
-  hosts:
-    - ravendb
-  tls: []
+  enabled: false

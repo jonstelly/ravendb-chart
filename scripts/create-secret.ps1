@@ -1,4 +1,12 @@
-#This script creates a kubernetes secret based on the PFX provided, prompts for password and adds password to secret too
+#This script creates a kubernetes secret for the RavenDB servers with the password and PFX provided.
+#This certificate should be signed by your certificate authority you provided in your my-ravendb image
+#The certificate should have Subject Alternative Names for at least the following hostnames (standard Kubernetes DNS usages):
+#This assumes you're deploying to the 'default' namespace and your ravendb deployment is named 'ravendb'.  If you change those defaults, your certificate should match those
+#DNS Name=ravendb
+#DNS Name=*.ravendb
+#DNS Name=ravendb.default.svc.cluster.local
+#DNS Name=*.ravendb.default.svc.cluster.local
+
 param([string]$PfxPath)
 
 $password = Read-Host -Prompt "PFX Password" -AsSecureString;
